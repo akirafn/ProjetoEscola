@@ -1,0 +1,33 @@
+﻿@page
+@model FrontWeb.Pages.StudentsModel
+@{
+	ViewData["Title"] = "Estudantes";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="text-center">
+	<div class="row">
+		<table class="table-striped">
+			<thead>
+				<tr>
+					<td>Nome</td>
+					<td>RA</td>
+					<td>Série</td>
+					<td>Classe</td>
+				</tr>
+			</thead>
+			<tbody>
+				@if(Model.studentList != null){
+					@foreach(var student in Model.studentList){
+						<tr>
+							<td>@student.name</td>
+							<td>@student.ra</td>
+							<td>@student.degreeName</td>
+							<td>@student.className</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
