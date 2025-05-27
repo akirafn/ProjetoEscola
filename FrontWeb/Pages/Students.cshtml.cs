@@ -11,7 +11,8 @@ namespace FrontWeb.Pages
         public IList<StudentCompleteModel> studentList { get; set; }
         public StudentsModel(ILogger<StudentsModel> logger)
         {
-            _logger = logger;
+            this._logger = logger;
+            this.studentList = new List<StudentCompleteModel>();
         }
         public async Task OnGetAsync()
         {

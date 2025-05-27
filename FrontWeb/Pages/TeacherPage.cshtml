@@ -1,0 +1,63 @@
+﻿@page
+@model FrontWeb.Pages.TeacherPageModel
+@{
+	ViewData["Title"] = "Professores";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="text-center">
+	<div class="row">
+		<b>Série</b>
+		<select class="form-control">
+			<option value="0">Selecione</option>
+		</select>
+		<b>Classe</b>
+		<select class="form-control">
+			<option value="0">Selecione</option>
+		</select>
+
+	</div>
+	<div class="row">
+		<table class="table-striped">
+			<thead>
+				<tr>
+					<td>Nome</td>
+					<td>Matéria</td>
+					<td>Série/Classe</td>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.list != null)
+				{
+					@foreach (var relationship in Model.list)
+					{
+						@if (relationship.classes.Count == 0)
+						{
+							<tr>
+								<td>@relationship.teacherName</td>
+								<td>@relationship.matterName</td>
+								<td></td>
+							</tr>
+						}
+						else
+						{
+							bool firstRow = true;
+							foreach (var classes in relationship.classes)
+							{
+								<tr>
+									@if (firstRow == true)
+									{
+										<td rowspan="@relationship.classes.Count" style="vertical-align:top">@relationship.teacherName</td>
+										<td rowspan="@relationship.classes.Count" style="vertical-align:top">@relationship.matterName</td>
+									}
+									<td>@classes.degreeName - @classes.className</td>
+								</tr>
+								firstRow = false;
+							}
+						}
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
