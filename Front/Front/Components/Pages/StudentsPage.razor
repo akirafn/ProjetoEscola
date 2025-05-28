@@ -1,0 +1,86 @@
+﻿@page "/students"
+@using Front.Models
+@using Front.Services
+@attribute [StreamRendering]
+
+<PageTitle>Estudantes</PageTitle>
+<h1>Estudantes</h1>
+
+@if(degreeList == null || classList == null){
+	<div class="row">
+		<p>Carregando....</p>
+	</div>
+} else {
+	<div class="row">
+		<div class="col-sm-1">Série</div>
+		<div class="col-sm-3">
+			<select @bind="@selectedDegree">
+				<option value="0">Selecione</option>
+				@foreach(var item in degreeList){
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-1">Classe</div>
+		<div class="col-sm-3">
+			<select @bind="@selectedClass">
+				<option value="0">Selecione</option>
+				@foreach(var item in classList){
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-4">
+			<button type="submit" @onclick="SearchStudentByFilter">Buscar</button>
+		</div>
+	</div>
+	<div class="row">
+		<table>
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>RA</th>
+					<th>Série/Classe</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if(studentList != null){
+					@foreach(var item in studentList){
+						<tr>
+							<td>@item.name</td>
+							<td>@item.ra</td>
+							<td>@string.Format("{0} - {1}", item.degreeName, item.className)</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
+@code {
+	private List<DegreesModel> degreeList;
+	private List<ClassesModel> classList;
+	private List<StudentCompleteModel> studentList;
+	private int selectedDegree;
+	private int selectedClass;
+
+	public StudentsPage()
+	{
+		degreeList = new List<DegreesModel>();
+		classList = new List<ClassesModel>();
+		studentList = new List<StudentCompleteModel>();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		degreeList = await DegreesService.GetAll();
+		classList = await ClassesService.GetAll();
+		studentList = await StudentsService.GetStudentsByFilter(0, 0);
+		selectedDegree = 0;
+		selectedClass = 0;
+	}
+
+	protected async Task SearchStudentByFilter(){
+		studentList = await StudentsService.GetStudentsByFilter(selectedDegree, selectedClass);
+	}
+}

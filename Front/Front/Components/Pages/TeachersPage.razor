@@ -1,0 +1,113 @@
+﻿@page "/teachers"
+@using Front.Models
+@using Front.Services
+@attribute [StreamRendering]
+
+<PageTitle>Professores</PageTitle>
+<h1>Professores</h1>
+
+@if (degreeList == null || classList == null)
+{
+	<div class="row">
+		<p>Carregando....</p>
+	</div>
+}
+else
+{
+	<div class="row">
+		<div class="col-sm-1">Série</div>
+		<div class="col-sm-3">
+			<select @bind="@selectedDegree">
+				<option value="0">Selecione</option>
+				@foreach (var item in degreeList)
+				{
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-1">Classe</div>
+		<div class="col-sm-3">
+			<select @bind="@selectedClass">
+				<option value="0">Selecione</option>
+				@foreach (var item in classList)
+				{
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-4">
+			<button type="submit" @onclick="SearchTeacherByFilter">Buscar</button>
+		</div>
+	</div>
+	<div class="row">
+		<table>
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Matéria</th>
+					<th>Série/Classe</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (teacherList != null)
+				{
+					@foreach (var item in teacherList)
+					{
+						if(item.classes.Count == 0)
+						{
+							<tr>
+								<td>@item.teacherName</td>
+								<td>@item.matterName</td>
+								<td></td>
+							</tr>
+						}
+						else
+						{
+							bool FirstRow = true;
+							foreach(var classe in item.classes)
+							{
+								<tr>
+									@if(FirstRow == true)
+									{
+										<td rowspan="@item.classes.Count" style="vertical-align: text-top">@item.teacherName</td>
+										<td rowspan="@item.classes.Count" style="vertical-align: text-top">@item.matterName</td>
+									}
+									<td>@string.Format("{0} - {1}", classe.degreeName, classe.className)</td>
+								</tr>
+								FirstRow = false;
+							}
+						}
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
+@code {
+	private List<DegreesModel> degreeList;
+	private List<ClassesModel> classList;
+	private List<RelationshipModel> teacherList;
+	private int selectedDegree;
+	private int selectedClass;
+
+	public TeachersPage()
+	{
+		degreeList = new List<DegreesModel>();
+		classList = new List<ClassesModel>();
+		teacherList = new List<RelationshipModel>();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		degreeList = await DegreesService.GetAll();
+		classList = await ClassesService.GetAll();
+		teacherList = await TeachersService.GetTeachersByFilter(0, 0);
+		selectedDegree = 0;
+		selectedClass = 0;
+	}
+
+	protected async Task SearchTeacherByFilter()
+	{
+		teacherList = await TeachersService.GetTeachersByFilter(selectedDegree, selectedClass);
+	}
+}

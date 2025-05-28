@@ -1,0 +1,64 @@
+﻿@page
+@model FrontWeb.Pages.StudentPageModel
+@{
+	ViewData["Title"] = "Estudantes";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="text-center">
+	<div class="row">
+		<div class="col-sm-1">Série</div>
+		<div class="col-sm-2">
+			<select id="selDegree" class="form-control">
+				<option value="0">Selecione</option>
+				@foreach (var item in Model.degrees){
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-1">Classe</div>
+		<div class="col-sm-1">
+			<select class="form-control">
+				<option value="0">Selecione</option>
+				@foreach(var item in Model.classes){
+					<option value="@item.id">@item.name</option>
+				}
+			</select>
+		</div>
+		<div class="col-sm-1">
+			<button onclick="@(async () => StudentSearch())">Buscar</button>
+		</div>
+	</div>
+	<div class="row">
+		<table class="table-striped">
+			<thead>
+				<tr>
+					<td>Nome</td>
+					<td>RA</td>
+					<td>Série</td>
+					<td>Classe</td>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.list != null)
+				{
+					@foreach (var student in Model.list)
+					{
+						<tr>
+							<td>@student.name</td>
+							<td>@student.ra</td>
+							<td>@student.degreeName</td>
+							<td>@student.className</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+@functions
+{
+	async Task StudentSearch(){
+		await this.Model.GetStudentByFilter(0, 0);
+	}
+}
