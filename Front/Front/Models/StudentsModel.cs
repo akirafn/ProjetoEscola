@@ -7,6 +7,15 @@
         public string name { get; set; }
         public int degreeId { get; set; }
         public int classId { get; set; }
+
+        public StudentsModel() 
+        {
+            id = 0;
+            ra = 0;
+            name = string.Empty;
+            degreeId = 0;
+            classId = 0;
+        }
     }
 
     public class StudentCompleteModel

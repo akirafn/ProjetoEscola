@@ -1,4 +1,5 @@
 ﻿@page "/students"
+@using Front.Components.Layout
 @using Front.Models
 @using Front.Services
 @attribute [StreamRendering]
@@ -6,6 +7,20 @@
 <PageTitle>Estudantes</PageTitle>
 <h1>Estudantes</h1>
 
+<StudentsModal @ref="StudentsModal" InvokeDataLoad="GetStudentData">
+	<div class="row">
+		<h5 class="col-sm-2" style="text-align:right">Nome:</h5>
+		<input type="text" class="col-sm-10" value="@studentName" />
+	</div>
+	<div class="row">
+		<h5 class="col-sm-2" style="text-align:right">RA:</h5>
+		<input type="text" class="col-sm-10" value="@studentRa" />
+	</div>
+</StudentsModal>
+
+<div class="row">
+	<button class="btn btn-primary" @onclick="OpenNewStudentsModal">Novo Estudante</button>
+</div>
 @if(degreeList == null || classList == null){
 	<div class="row">
 		<p>Carregando....</p>
@@ -41,6 +56,7 @@
 					<th>Nome</th>
 					<th>RA</th>
 					<th>Série/Classe</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -50,6 +66,7 @@
 							<td>@item.name</td>
 							<td>@item.ra</td>
 							<td>@string.Format("{0} - {1}", item.degreeName, item.className)</td>
+							<td class="col-sm-3"><button type="button" class="btn btn-secondary" @onclick="() => OpenStudentsModal(item)">Ver Detalhes</button> </td>
 						</tr>
 					}
 				}
@@ -61,8 +78,11 @@
 	private List<DegreesModel> degreeList;
 	private List<ClassesModel> classList;
 	private List<StudentCompleteModel> studentList;
+	private StudentsModal StudentsModal { get; set; }
 	private int selectedDegree;
 	private int selectedClass;
+	private string studentName;
+	private string studentRa;
 
 	public StudentsPage()
 	{
@@ -82,5 +102,31 @@
 
 	protected async Task SearchStudentByFilter(){
 		studentList = await StudentsService.GetStudentsByFilter(selectedDegree, selectedClass);
+	}
+
+	protected void OpenNewStudentsModal(){
+		studentName = string.Empty;
+		studentRa = string.Empty;
+		StudentsModal.Open(new StudentsModel());
+	}
+
+	protected void OpenStudentsModal(StudentCompleteModel student)
+	{
+		StudentsModel studentData = new StudentsModel();
+		studentData.id = student.id;
+		studentData.ra = student.ra;
+		studentData.name = student.name;
+		studentData.degreeId = student.degreeId;
+		studentData.classId = student.classId;
+
+		studentName = student.name;
+		studentRa = student.ra.ToString();
+
+		StudentsModal.Open(studentData);
+	}
+
+	protected StudentsModel GetStudentData(StudentsModel model){
+		model.name = studentName;
+		return model;
 	}
 }

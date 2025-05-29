@@ -11,19 +11,33 @@ namespace API.Services
         {
             string query = "SELECT id, name FROM dbo.Degrees ORDER BY id;";
             List<DegreesModel> list = new List<DegreesModel>();
+            SqlConnection conn = null;
+            SqlDataReader reader = null;
 
-            using (SqlConnection conn = GetConnection())
+            try
             {
-                await conn.OpenAsync();
-                DbDataReader reader = await conn.ExecuteReaderAsync(query);
-                while (reader.Read())
+                using (conn = GetConnection())
                 {
-                    DegreesModel model = new DegreesModel();
-                    model.id = reader.GetInt32(reader.GetOrdinal("id"));
-                    model.name = reader.GetString(reader.GetOrdinal("name"));
-                    list.Add(model);
+                    await conn.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        reader = await cmd.ExecuteReaderAsync();
+                        while (reader.Read())
+                        {
+                            DegreesModel model = new DegreesModel();
+                            model.id = reader.GetInt32(reader.GetOrdinal("id"));
+                            model.name = reader.GetString(reader.GetOrdinal("name"));
+                            list.Add(model);
+                        }
+                    }
                 }
-                await conn.CloseAsync();
+            }
+            finally
+            {
+                if(reader != null)
+                    await reader.CloseAsync();
+                if (conn != null)
+                    await conn.CloseAsync();
             }
 
             return list;

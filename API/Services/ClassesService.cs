@@ -9,22 +9,35 @@ namespace API.Services
     {
         public static async Task<List<ClassesModel>> GetAll()
         {
-
             string query = "SELECT id, name FROM dbo.Classes ORDER BY id;";
             List<ClassesModel> list = new List<ClassesModel>();
+            SqlConnection conn = null;
+            SqlDataReader reader = null;
 
-            using (SqlConnection conn = GetConnection())
+            try
             {
-                await conn.OpenAsync();
-                DbDataReader reader = await conn.ExecuteReaderAsync(query);
-                while (reader.Read())
+                using (conn = GetConnection())
                 {
-                    ClassesModel model = new ClassesModel();
-                    model.id = reader.GetInt32(reader.GetOrdinal("id"));
-                    model.name = reader.GetString(reader.GetOrdinal("name"));
-                    list.Add(model);
+                    await conn.OpenAsync();
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        reader = await cmd.ExecuteReaderAsync();
+                        while (reader.Read())
+                        {
+                            ClassesModel model = new ClassesModel();
+                            model.id = reader.GetInt32(reader.GetOrdinal("id"));
+                            model.name = reader.GetString(reader.GetOrdinal("name"));
+                            list.Add(model);
+                        }
+                    }
                 }
-                await conn.CloseAsync();
+            }
+            finally
+            {
+                if(reader != null)
+                    await reader.CloseAsync();
+                if (conn != null)
+                    await conn.CloseAsync();
             }
 
             return list;

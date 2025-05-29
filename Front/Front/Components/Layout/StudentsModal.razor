@@ -1,0 +1,62 @@
+﻿@using Front.Models
+@inject IJSRuntime JSRuntime
+
+<div class="modal @modalClass" tabindex="-1" role="dialog" style="display: @modalDisplay overflow-y: auto;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">@modalTitle</h5>
+				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar" @onclick="Close"></button>
+			</div>
+			<div class="modal-body">
+				@ChildContent
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" @onclick="InvokeSaveData">Salvar</button>
+				<button type="button" class="btn" aria-label="Fechar" @onclick="Close">Fechar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public RenderFragment ChildContent{ get; set; }
+	[Parameter]
+	public Func<StudentsModel, StudentsModel> InvokeDataLoad{ get; set; }
+
+	private string modalTitle = "";
+	private string modalDisplay = "none;";
+	private string modalClass = "";
+	private bool showBackdrop = false;
+	private StudentsModel stData = new StudentsModel();
+
+	public void Open(StudentsModel studentData)
+	{
+		stData = studentData;
+		modalDisplay = "block;";
+		modalClass = "show";
+		if (string.IsNullOrEmpty(studentData.name))
+			modalTitle = "Novo Estudante";
+		else
+			modalTitle = string.Format("Dados de {0}", stData.name);
+		showBackdrop = true;
+	}
+	public void Close()
+	{
+		stData = new StudentsModel();
+		modalDisplay = "none;";
+		modalClass = "";
+		showBackdrop = false;
+	}
+
+	public StudentsModel getStudentData()
+	{
+		return this.stData;
+	}
+
+	private async Task InvokeSaveData()
+	{
+		StudentsModel model = InvokeDataLoad.Invoke(stData);
+	}
+}
