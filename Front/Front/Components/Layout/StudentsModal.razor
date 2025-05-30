@@ -10,10 +10,38 @@
 				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar" @onclick="Close"></button>
 			</div>
 			<div class="modal-body">
+				<div class="row">
+					<h5 class="col-sm-2" style="text-align:right">Nome:</h5>
+					<input type="text" class="col-sm-10" @bind="@studentName" />
+				</div>
+				<div class="row">
+					<h5 class="col-sm-2" style="text-align:right">RA:</h5>
+					<input type="text" class="col-sm-10" @bind="@studentRa" />
+				</div>
+				<div class="row">
+					<h5 class="col-sm-2" style="text-align: right">Série:</h5>
+					<select class="col-sm-10" @bind="@studentDegree">
+						<option value="0">Selecione</option>
+						@foreach (var item in degreeList)
+						{
+							<option value="@item.id">@item.name</option>
+						}
+					</select>
+				</div>
+				<div class="row">
+					<h5 class="col-sm-2" style="text-align: right">Classe:</h5>
+					<select class="col-sm-10" @bind="@studentClass">
+						<option value="0">Selecione</option>
+						@foreach (var item in classList)
+						{
+							<option value="@item.id">@item.name</option>
+						}
+					</select>
+				</div>
 				@ChildContent
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn" @onclick="InvokeSaveData">Salvar</button>
+				<button type="button" class="btn" @onclick="SaveData">Salvar</button>
 				<button type="button" class="btn" aria-label="Fechar" @onclick="Close">Fechar</button>
 			</div>
 		</div>
@@ -24,44 +52,57 @@
 	[Parameter]
 	public RenderFragment ChildContent{ get; set; }
 	[Parameter]
-	public Func<StudentsModel, StudentsModel> InvokeDataLoad{ get; set; }
+	public EventCallback InvokeDataLoad{ get; set; }
 
 	private string modalTitle = "";
 	private string modalDisplay = "none;";
 	private string modalClass = "";
 	private bool showBackdrop = false;
-	private StudentsModel stData = new StudentsModel();
+	private string studentName = "";
+	private string studentRa = "";
+	private int studentDegree = 0;
+	private int studentClass = 0;
+	private StudentsModel studentData = new StudentsModel();
+	private List<DegreesModel> degreeList = new List<DegreesModel>();
+	private List<ClassesModel> classList = new List<ClassesModel>();
 
-	public void Open(StudentsModel studentData)
+	public void Open(StudentsModel studentData, List<DegreesModel> degreeList, List<ClassesModel> classList)
 	{
-		stData = studentData;
+		this.studentData = studentData;
+		this.studentName = studentData.name;
+		this.studentRa = studentData.ra.ToString();
+		this.studentDegree = studentData.degreeId;
+		this.studentClass = studentData.classId;
+		this.degreeList = degreeList;
+		this.classList = classList;
+
 		modalDisplay = "block;";
 		modalClass = "show";
 		if (string.IsNullOrEmpty(studentData.name))
 			modalTitle = "Novo Estudante";
 		else
-			modalTitle = string.Format("Dados de {0}", stData.name);
+			modalTitle = string.Format("Dados de {0}", studentData.name);
 		showBackdrop = true;
 	}
 	public void Close()
 	{
-		stData = new StudentsModel();
+		studentData = new StudentsModel();
 		modalDisplay = "none;";
 		modalClass = "";
 		showBackdrop = false;
 	}
 
-	public StudentsModel getStudentData()
+	private async Task SaveData()
 	{
-		return this.stData;
-	}
+		studentData.name = studentName;
+		studentData.ra = int.Parse(studentRa);
+		studentData.degreeId = studentDegree;
+		studentData.classId = studentClass;
 
-	private async Task InvokeSaveData()
-	{
-		StudentsModel model = InvokeDataLoad.Invoke(stData);
-		int result = await StudentsService.SaveStudentData(model);
+		int result = await StudentsService.SaveStudentData(studentData);
 		if(result == 0){
 			await JSRuntime.InvokeVoidAsync("alert", "Dados salvos com sucesso!");
+			await InvokeDataLoad.InvokeAsync();
 			Close();
 		}
 		else{

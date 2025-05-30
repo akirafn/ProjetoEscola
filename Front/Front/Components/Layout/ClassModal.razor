@@ -1,0 +1,70 @@
+﻿@using Front.Models
+@using Front.Services
+@inject IJSRuntime JSRuntime
+
+<div class="modal @modalClass" tabindex="-1" role="dialog" style="display: @modalDisplay overflow-y: auto;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">@modalTitle</h5>
+				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Fechar" @onclick="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<table>
+						<thead>
+							<tr>
+								<th>Nome</th>
+								<th>RA</th>
+							</tr>
+						</thead>
+						<tbody>
+							@if (list != null)
+							{
+								foreach(var item in list)
+								{
+									<tr>
+										<td>@item.name</td>
+										<td>@item.ra</td>
+									</tr>
+								}
+							}
+						</tbody>
+					</table>
+				</div>
+				@ChildContent
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn" aria-label="Fechar" @onclick="Close">Fechar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public RenderFragment ChildContent { get; set; }
+
+	private List<StudentCompleteModel> list = null;
+	private string modalTitle = "";
+	private string modalDisplay = "none;";
+	private string modalClass = "";
+	private bool showBackdrop = false;
+
+	public async Task Open(TeacherClassModel classModel)
+	{
+		list = await StudentsService.GetStudentsByFilter(classModel.degreeId, classModel.classId);
+
+		modalTitle = string.Format("Detalhes para {0} {1}", classModel.degreeName, classModel.className);
+		modalDisplay = "block;";
+		modalClass = "show";
+		showBackdrop = false;
+	}
+
+	public void Close()
+	{
+		modalDisplay = "none;";
+		modalClass = "";
+		showBackdrop = false;
+	}
+}

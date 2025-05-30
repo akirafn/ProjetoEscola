@@ -1,10 +1,15 @@
 ﻿@page "/teachers"
+@using Front.Components.Layout
 @using Front.Models
 @using Front.Services
 @attribute [StreamRendering]
 
 <PageTitle>Professores</PageTitle>
 <h1>Professores</h1>
+
+<ClassModal @ref="ClassModal">
+	<div class="row"></div>
+</ClassModal>
 
 @if (degreeList == null || classList == null)
 {
@@ -46,6 +51,7 @@ else
 					<th>Nome</th>
 					<th>Matéria</th>
 					<th>Série/Classe</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -73,6 +79,7 @@ else
 										<td rowspan="@item.classes.Count" style="vertical-align: text-top">@item.matterName</td>
 									}
 									<td>@string.Format("{0} - {1}", classe.degreeName, classe.className)</td>
+									<td><button type="button" class="btn btn-secondary" @onclick="() => OpenClassModal(classe)">Listar Alunos</button></td>
 								</tr>
 								FirstRow = false;
 							}
@@ -87,6 +94,7 @@ else
 	private List<DegreesModel> degreeList;
 	private List<ClassesModel> classList;
 	private List<RelationshipModel> teacherList;
+	private ClassModal ClassModal{ get; set; }
 	private int selectedDegree;
 	private int selectedClass;
 
@@ -109,5 +117,10 @@ else
 	protected async Task SearchTeacherByFilter()
 	{
 		teacherList = await TeachersService.GetTeachersByFilter(selectedDegree, selectedClass);
+	}
+
+	protected async Task OpenClassModal(TeacherClassModel classModel)
+	{
+		await ClassModal.Open(classModel);
 	}
 }
