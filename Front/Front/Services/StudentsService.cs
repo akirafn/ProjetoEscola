@@ -26,13 +26,14 @@ namespace Front.Services
 
         public static async Task<int> SaveStudentData(StudentsModel model)
         {
+            string url = string.Format("{0}Students/SaveStudentData", _apiurl);
             string jsonInput = JsonSerializer.Serialize(model);
-            StringContent content = new StringContent(jsonInput, System.Text.Encoding.UTF8, "application/json");
             int result = 0;
+            StringContent content = new StringContent(jsonInput, System.Text.Encoding.UTF8, "application/json");
 
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage response = await client.PostAsync(_apiurl, content))
+                using (HttpResponseMessage response = await client.PostAsync(url, content))
                 {
                     if (response.StatusCode != System.Net.HttpStatusCode.OK)
                         result = -1;

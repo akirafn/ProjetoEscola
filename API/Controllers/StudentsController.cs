@@ -27,5 +27,20 @@ namespace API.Controllers
             List<StudentCompleteModel> list = await StudentsService.GetStudentsByFilter(degreeId, classId);
             return Ok(list);
         }
+
+        [HttpPost("SaveStudentData")]
+        public async Task<IActionResult> SaveStudentData(StudentsModel model)
+        {
+            if(model.id == 0)
+            {
+                await StudentsService.InsertStudentData(model);
+            }
+            else
+            {
+                await StudentsService.UpdateStudentData(model);
+            }
+
+            return Ok();
+        }
     }
 }
